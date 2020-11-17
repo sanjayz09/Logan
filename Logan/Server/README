@@ -33,6 +33,30 @@ CREATE TABLE `logan_log_detail` (
   KEY `idx_task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='日志解析后的数据详情';
 
+----
+In mysql 5.5 only one TIMESTAMP column with CURRENT_TIMESTAMP in DEFAULT, so just create table as follows:
+
+CREATE TABLE `logan_log_detail` (
+  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `task_id` bigint(11) unsigned NOT NULL COMMENT '所属任务id',
+  `log_type` int(11) unsigned NOT NULL COMMENT '日志类型',
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '原始日志',
+  `log_time` bigint(20) unsigned NOT NULL COMMENT '本条日志产生的具体时间戳',
+  `add_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '添加时间',
+  `update_time` datetime  COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_update_time` (`update_time`),
+  KEY `idx_task_id` (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='日志解析后的数据详情';
+
+DROP TRIGGER IF EXISTS `update_logan_log_detail_trigger`;
+DELIMITER //
+CREATE TRIGGER `update_logan_log_detail_trigger` BEFORE UPDATE ON `logan_log_detail`
+ FOR EACH ROW SET NEW.`update_time` = NOW()
+//
+DELIMITER ;
+----
+
 CREATE TABLE `web_task` (
   `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `device_id` varchar(128) NOT NULL DEFAULT '' COMMENT '设备id',
